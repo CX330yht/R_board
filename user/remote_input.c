@@ -1,0 +1,199 @@
+#include "remote_input.h"
+#include "adc.h"
+
+#define INPUT_SAMPLE_MS 10U
+#define KEY_DEBOUNCE_MS 20U
+#define ADC_TIMEOUT_MS  2U
+#define AXIS_CENTER     2048
+#define AXIS_DEADZONE   120
+
+volatile RemoteInputDebug_t g_remote_input;
+
+static uint32_t s_sample_tick;
+static uint32_t s_key_change_tick[REMOTE_KEY_COUNT];
+static uint8_t s_candidate_keys;
+static uint8_t s_stable_keys;
+
+static const uint32_t s_adc_channels[REMOTE_AXIS_COUNT] =
+{
+    ADC_CHANNEL_1, ADC_CHANNEL_2, ADC_CHANNEL_3, ADC_CHANNEL_4
+};
+
+static uint8_t Remote_ReadKeys(void)
+{
+    GPIO_TypeDef * const ports[REMOTE_KEY_COUNT] =
+    {
+        KEY_TURN_L_GPIO_Port, KEY_TURN_R_GPIO_Port,
+        KEY_GRIP1_GPIO_Port, KEY_GRIP2_GPIO_Port,
+        KEY_SPEED_GPIO_Port, KEY_ESTOP_GPIO_Port,
+        KEY_ENABLE_GPIO_Port
+    };
+    const uint16_t pins[REMOTE_KEY_COUNT] =
+    {
+        KEY_TURN_L_Pin, KEY_TURN_R_Pin,
+        KEY_GRIP1_Pin, KEY_GRIP2_Pin,
+        KEY_SPEED_Pin, KEY_ESTOP_Pin,
+        KEY_ENABLE_Pin
+    };
+    uint8_t mask = 0U;
+
+    for (uint32_t i = 0U; i < REMOTE_KEY_COUNT; ++i)
+    {
+        if (HAL_GPIO_ReadPin(ports[i], pins[i]) == GPIO_PIN_RESET)
+        {
+            mask |= (uint8_t)(1U << i);
+        }
+    }
+    return mask;
+}
+
+static void Remote_UpdateKeys(uint32_t now)
+{
+    uint8_t raw = Remote_ReadKeys();
+
+    /* Emergency raw input does not wait for the debounce interval. */
+    g_remote_input.estop_raw = (raw & REMOTE_KEY_ESTOP) ? 1U : 0U;
+    g_remote_input.pressed_edges = 0U;
+    g_remote_input.released_edges = 0U;
+
+    for (uint32_t i = 0U; i < REMOTE_KEY_COUNT; ++i)
+    {
+        uint8_t bit = (uint8_t)(1U << i);
+
+        if ((raw & bit) != (s_candidate_keys & bit))
+        {
+            s_candidate_keys ^= bit;
+            s_key_change_tick[i] = now;
+        }
+
+        if ((s_candidate_keys & bit) != (s_stable_keys & bit) &&
+            (uint32_t)(now - s_key_change_tick[i]) >= KEY_DEBOUNCE_MS)
+        {
+            s_stable_keys ^= bit;
+            if (s_stable_keys & bit)
+            {
+                g_remote_input.pressed_edges |= bit;
+                g_remote_input.key_press_count[i]++;
+            }
+            else
+            {
+                g_remote_input.released_edges |= bit;
+            }
+        }
+    }
+    g_remote_input.keys_down = s_stable_keys;
+}
+
+static HAL_StatusTypeDef Remote_ReadAdc(uint32_t channel,
+                                        uint16_t *value)
+{
+    ADC_ChannelConfTypeDef config = {0};
+    config.Channel = channel;
+    config.Rank = ADC_REGULAR_RANK_1;
+    config.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+
+    HAL_StatusTypeDef status = HAL_ADC_ConfigChannel(&hadc1, &config);
+    if (status != HAL_OK)
+    {
+        return status;
+    }
+
+    status = HAL_ADC_Start(&hadc1);
+    if (status == HAL_OK)
+    {
+        status = HAL_ADC_PollForConversion(&hadc1, ADC_TIMEOUT_MS);
+    }
+    if (status == HAL_OK)
+    {
+        *value = (uint16_t)HAL_ADC_GetValue(&hadc1);
+    }
+
+    HAL_StatusTypeDef stop_status = HAL_ADC_Stop(&hadc1);
+    return (status == HAL_OK) ? stop_status : status;
+}
+
+static int16_t Remote_Normalize(uint16_t raw)
+{
+    int32_t delta = (int32_t)raw - AXIS_CENTER;
+    int32_t result = 0;
+
+    if (delta > AXIS_DEADZONE)
+    {
+        result = (delta - AXIS_DEADZONE) * 1000 /
+                 (4095 - AXIS_CENTER - AXIS_DEADZONE);
+    }
+    else if (delta < -AXIS_DEADZONE)
+    {
+        result = (delta + AXIS_DEADZONE) * 1000 /
+                 (AXIS_CENTER - AXIS_DEADZONE);
+    }
+
+    if (result > 1000) result = 1000;
+    if (result < -1000) result = -1000;
+    return (int16_t)result;
+}
+
+void RemoteInput_Init(void)
+{
+    uint32_t now = HAL_GetTick();
+    g_remote_input = (RemoteInputDebug_t){0};
+    s_sample_tick = now;
+
+    /* A key held at startup does not create a new press event. */
+    s_candidate_keys = Remote_ReadKeys();
+    s_stable_keys = s_candidate_keys;
+    g_remote_input.keys_down = s_stable_keys;
+    g_remote_input.estop_raw =
+        (s_stable_keys & REMOTE_KEY_ESTOP) ? 1U : 0U;
+    for (uint32_t i = 0U; i < REMOTE_KEY_COUNT; ++i)
+    {
+        s_key_change_tick[i] = now;
+    }
+
+    /* Hardware ADC calibration, not joystick neutral calibration. */
+    g_remote_input.calibration_status = HAL_ADCEx_Calibration_Start(&hadc1);
+    g_remote_input.adc_status = g_remote_input.calibration_status;
+    if (g_remote_input.calibration_status != HAL_OK)
+    {
+        g_remote_input.error_count++;
+    }
+}
+
+void RemoteInput_Process(uint32_t now)
+{
+    Remote_UpdateKeys(now);
+
+    if (g_remote_input.calibration_status != HAL_OK ||
+        (uint32_t)(now - s_sample_tick) < INPUT_SAMPLE_MS)
+    {
+        return;
+    }
+    s_sample_tick = now;
+
+    uint16_t sample[REMOTE_AXIS_COUNT];
+    for (uint32_t i = 0U; i < REMOTE_AXIS_COUNT; ++i)
+    {
+        HAL_StatusTypeDef status = Remote_ReadAdc(s_adc_channels[i], &sample[i]);
+        g_remote_input.adc_status = status;
+        if (status != HAL_OK)
+        {
+            /* Discard the entire failed frame; no mixed old/new axes. */
+            g_remote_input.valid = 0U;
+            g_remote_input.error_count++;
+            for (uint32_t j = 0U; j < REMOTE_AXIS_COUNT; ++j)
+            {
+                g_remote_input.axis[j] = 0;
+            }
+            return;
+        }
+    }
+
+    for (uint32_t i = 0U; i < REMOTE_AXIS_COUNT; ++i)
+    {
+        g_remote_input.raw[i] = sample[i];
+        g_remote_input.axis[i] = Remote_Normalize(sample[i]);
+    }
+    g_remote_input.sample_ms = HAL_GetTick();
+    g_remote_input.sample_count++;
+    g_remote_input.valid = 1U;
+}

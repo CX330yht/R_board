@@ -1,6 +1,7 @@
 #include "rboard_app.h"
 #include "tim.h"
 #include "usart.h"
+#include "remote_input.h"
 
 volatile RBoardDebug_t g_rboard_debug;
 
@@ -36,6 +37,7 @@ void RBoardApp_Init(void)
     HAL_GPIO_WritePin(NRF_CE_GPIO_Port, NRF_CE_Pin, GPIO_PIN_RESET);
 
     g_rboard_debug.tim2_start_status = HAL_TIM_Base_Start(&htim2);
+    RemoteInput_Init();
     RBoard_SendAlive();
 
     s_led_tick = HAL_GetTick();
@@ -45,6 +47,7 @@ void RBoardApp_Init(void)
 void RBoardApp_Process(void)
 {
     uint32_t now = HAL_GetTick();
+    RemoteInput_Process(now);
 
     g_rboard_debug.uptime_ms = now;
     g_rboard_debug.loop_count++;
@@ -76,8 +79,10 @@ void RBoardApp_Process(void)
 
     /* A failed peripheral does not stop the application loop. */
     uint8_t fault =
-        (g_rboard_debug.tim2_start_status != HAL_OK ||
-         g_rboard_debug.uart_last_status != HAL_OK) ? 1U : 0U;
+    (g_rboard_debug.tim2_start_status != HAL_OK ||
+     g_rboard_debug.uart_last_status != HAL_OK ||
+     g_remote_input.calibration_status != HAL_OK ||
+     g_remote_input.adc_status != HAL_OK) ? 1U : 0U;
     HAL_GPIO_WritePin(LED_AUX_GPIO_Port, LED_AUX_Pin,
                      fault ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
