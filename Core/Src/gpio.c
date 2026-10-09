@@ -45,13 +45,10 @@ void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_RUN_GPIO_Port, LED_RUN_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(NRF_CSN_GPIO_Port, NRF_CSN_Pin, GPIO_PIN_SET);
@@ -60,27 +57,23 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(NRF_CE_GPIO_Port, NRF_CE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LED_RUN_GPIO_Port, LED_RUN_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_AUX_GPIO_Port, LED_AUX_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : KEY_SPEED_Pin KEY_ESTOP_Pin KEY_SW9_Pin KEY_SW12_Pin
-                           KEY_ENABLE_Pin KEY_SW13_Pin KEY_SW11__Pin KEY_GRIP1_Pin
-                           KEY_GRIP2_Pin KEY_TURN_L_Pin KEY_TURN_R_Pin */
-  GPIO_InitStruct.Pin = KEY_SPEED_Pin|KEY_ESTOP_Pin|KEY_SW9_Pin|KEY_SW12_Pin
-                          |KEY_ENABLE_Pin|KEY_SW13_Pin|KEY_SW11__Pin|KEY_GRIP1_Pin
-                          |KEY_GRIP2_Pin|KEY_TURN_L_Pin|KEY_TURN_R_Pin;
+  /*Configure GPIO pins : KEY_SW11_Pin KEY_SPEED_Pin KEY_SW13_Pin KEY_GRIP2_Pin
+                           KEY_TURN_R_Pin KEY_ENABLE_Pin KEY_SW10_Pin KEY_TURN_L_Pin
+                           KEY_GRIP1_Pin KEY_ESTOP_Pin KEY_SW9_Pin KEY_SW12_Pin */
+  GPIO_InitStruct.Pin = KEY_SW11_Pin|KEY_SPEED_Pin|KEY_SW13_Pin|KEY_GRIP2_Pin
+                          |KEY_TURN_R_Pin|KEY_ENABLE_Pin|KEY_SW10_Pin|KEY_TURN_L_Pin
+                          |KEY_GRIP1_Pin|KEY_ESTOP_Pin|KEY_SW9_Pin|KEY_SW12_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LED_RUN_Pin */
-  GPIO_InitStruct.Pin = LED_RUN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_RUN_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : JOY_L_B_Pin JOY_R_A_Pin JOY_R_B_Pin */
-  GPIO_InitStruct.Pin = JOY_L_B_Pin|JOY_R_A_Pin|JOY_R_B_Pin;
+  /*Configure GPIO pins : JOY_R_B_Pin JOY_L_A_Pin JOY_L_B_Pin */
+  GPIO_InitStruct.Pin = JOY_R_B_Pin|JOY_L_A_Pin|JOY_L_B_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -91,17 +84,24 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : KEY_JOY_R_Pin KEY_JOY_L_Pin */
+  GPIO_InitStruct.Pin = KEY_JOY_R_Pin|KEY_JOY_L_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /*Configure GPIO pin : NRF_IRQ_Pin */
   GPIO_InitStruct.Pin = NRF_IRQ_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(NRF_IRQ_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : KEY_JOY_R_Pin KEY_JOY_L_Pin */
-  GPIO_InitStruct.Pin = KEY_JOY_R_Pin|KEY_JOY_L_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  /*Configure GPIO pin : LED_RUN_Pin */
+  GPIO_InitStruct.Pin = LED_RUN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(LED_RUN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED_AUX_Pin */
   GPIO_InitStruct.Pin = LED_AUX_Pin;

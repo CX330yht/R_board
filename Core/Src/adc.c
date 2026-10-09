@@ -85,9 +85,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     /**ADC1 GPIO Configuration
     PA1     ------> ADC1_IN1
     */
-    GPIO_InitStruct.Pin = JOY_L_A_Pin;
+    GPIO_InitStruct.Pin = JOY_R_A_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    HAL_GPIO_Init(JOY_L_A_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(JOY_R_A_GPIO_Port, &GPIO_InitStruct);
 
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
@@ -109,7 +109,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     /**ADC1 GPIO Configuration
     PA1     ------> ADC1_IN1
     */
-    HAL_GPIO_DeInit(JOY_L_A_GPIO_Port, JOY_L_A_Pin);
+    HAL_GPIO_DeInit(JOY_R_A_GPIO_Port, JOY_R_A_Pin);
 
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 

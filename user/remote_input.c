@@ -16,7 +16,10 @@ static uint8_t s_stable_keys;
 
 static const uint32_t s_adc_channels[REMOTE_AXIS_COUNT] =
 {
-    ADC_CHANNEL_1, ADC_CHANNEL_2, ADC_CHANNEL_3, ADC_CHANNEL_4
+    ADC_CHANNEL_3, /* 左摇杆 A：PA3 */
+    ADC_CHANNEL_4, /* 左摇杆 B：PA4 */
+    ADC_CHANNEL_1, /* 右摇杆 A：PA1 */
+    ADC_CHANNEL_2  /* 右摇杆 B：PA2 */
 };
 
 static uint8_t Remote_ReadKeys(void)
