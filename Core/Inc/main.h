@@ -77,8 +77,8 @@ void Error_Handler(void);
 #define JOY_L_B_GPIO_Port GPIOA
 #define KEY_ENABLE_Pin GPIO_PIN_4
 #define KEY_ENABLE_GPIO_Port GPIOC
-#define KEY_SW10_Pin GPIO_PIN_5
-#define KEY_SW10_GPIO_Port GPIOC
+#define KEY_ROTATE_B_Pin GPIO_PIN_5
+#define KEY_ROTATE_B_GPIO_Port GPIOC
 #define NRF_CSN_Pin GPIO_PIN_0
 #define NRF_CSN_GPIO_Port GPIOB
 #define NRF_CE_Pin GPIO_PIN_1

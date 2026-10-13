@@ -63,10 +63,10 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED_AUX_GPIO_Port, LED_AUX_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : KEY_SW11_Pin KEY_SPEED_Pin KEY_SW13_Pin KEY_GRIP2_Pin
-                           KEY_TURN_R_Pin KEY_ENABLE_Pin KEY_SW10_Pin KEY_TURN_L_Pin
+                           KEY_TURN_R_Pin KEY_ENABLE_Pin KEY_ROTATE_B_Pin KEY_TURN_L_Pin
                            KEY_GRIP1_Pin KEY_ESTOP_Pin KEY_SW9_Pin KEY_SW12_Pin */
   GPIO_InitStruct.Pin = KEY_SW11_Pin|KEY_SPEED_Pin|KEY_SW13_Pin|KEY_GRIP2_Pin
-                          |KEY_TURN_R_Pin|KEY_ENABLE_Pin|KEY_SW10_Pin|KEY_TURN_L_Pin
+                          |KEY_TURN_R_Pin|KEY_ENABLE_Pin|KEY_ROTATE_B_Pin|KEY_TURN_L_Pin
                           |KEY_GRIP1_Pin|KEY_ESTOP_Pin|KEY_SW9_Pin|KEY_SW12_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
