@@ -32,7 +32,9 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 enable_language(C ASM)
 
 # Create an executable object type
-add_executable(${CMAKE_PROJECT_NAME})
+add_executable(${CMAKE_PROJECT_NAME}
+        user/remote_command.h
+        user/remote_command.c)
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
@@ -47,6 +49,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         user/rboard_app.c
         user/remote_input.c
         user/nrf24.c
+        user/remote_command.c
 
     # Add user sources here
 )

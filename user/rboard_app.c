@@ -3,6 +3,7 @@
 #include "usart.h"
 #include "remote_input.h"
 #include "nrf24.h"
+#include "remote_command.h"
 
 volatile RBoardDebug_t g_rboard_debug;
 
@@ -39,6 +40,7 @@ void RBoardApp_Init(void)
 
     g_rboard_debug.tim2_start_status = HAL_TIM_Base_Start(&htim2);
     RemoteInput_Init();
+    RemoteCommand_Init();
     (void)NRF24_Init();
     RBoard_SendAlive();
 
@@ -50,6 +52,7 @@ void RBoardApp_Process(void)
 {
     uint32_t now = HAL_GetTick();
     RemoteInput_Process(now);
+    RemoteCommand_Process(HAL_GetTick());
 
     g_rboard_debug.uptime_ms = now;
     g_rboard_debug.loop_count++;

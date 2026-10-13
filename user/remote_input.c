@@ -29,14 +29,14 @@ static uint8_t Remote_ReadKeys(void)
         KEY_TURN_L_GPIO_Port, KEY_TURN_R_GPIO_Port,
         KEY_GRIP1_GPIO_Port, KEY_GRIP2_GPIO_Port,
         KEY_SPEED_GPIO_Port, KEY_ESTOP_GPIO_Port,
-        KEY_ENABLE_GPIO_Port
+        KEY_ENABLE_GPIO_Port, KEY_ROTATE_B_GPIO_Port
     };
     const uint16_t pins[REMOTE_KEY_COUNT] =
     {
         KEY_TURN_L_Pin, KEY_TURN_R_Pin,
         KEY_GRIP1_Pin, KEY_GRIP2_Pin,
         KEY_SPEED_Pin, KEY_ESTOP_Pin,
-        KEY_ENABLE_Pin
+        KEY_ENABLE_Pin, KEY_ROTATE_B_Pin
     };
     uint8_t mask = 0U;
 
