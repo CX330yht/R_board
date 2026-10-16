@@ -57,16 +57,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define KEY_SW11_Pin GPIO_PIN_14
-#define KEY_SW11_GPIO_Port GPIOC
-#define KEY_SPEED_Pin GPIO_PIN_0
-#define KEY_SPEED_GPIO_Port GPIOC
-#define KEY_SW13_Pin GPIO_PIN_1
-#define KEY_SW13_GPIO_Port GPIOC
-#define KEY_GRIP2_Pin GPIO_PIN_2
-#define KEY_GRIP2_GPIO_Port GPIOC
-#define KEY_TURN_R_Pin GPIO_PIN_3
+#define KEY_TURN_R_Pin GPIO_PIN_14
 #define KEY_TURN_R_GPIO_Port GPIOC
+#define KEY_ROTATE_B_Pin GPIO_PIN_0
+#define KEY_ROTATE_B_GPIO_Port GPIOC
+#define KEY_SPARE_SW12_Pin GPIO_PIN_1
+#define KEY_SPARE_SW12_GPIO_Port GPIOC
+#define KEY_ENABLE_Pin GPIO_PIN_2
+#define KEY_ENABLE_GPIO_Port GPIOC
+#define KEY_SPARE_SW2_Pin GPIO_PIN_3
+#define KEY_SPARE_SW2_GPIO_Port GPIOC
 #define JOY_R_A_Pin GPIO_PIN_1
 #define JOY_R_A_GPIO_Port GPIOA
 #define JOY_R_B_Pin GPIO_PIN_2
@@ -75,10 +75,10 @@ void Error_Handler(void);
 #define JOY_L_A_GPIO_Port GPIOA
 #define JOY_L_B_Pin GPIO_PIN_4
 #define JOY_L_B_GPIO_Port GPIOA
-#define KEY_ENABLE_Pin GPIO_PIN_4
-#define KEY_ENABLE_GPIO_Port GPIOC
-#define KEY_ROTATE_B_Pin GPIO_PIN_5
-#define KEY_ROTATE_B_GPIO_Port GPIOC
+#define KEY_SPEED_Pin GPIO_PIN_4
+#define KEY_SPEED_GPIO_Port GPIOC
+#define KEY_TURN_L_Pin GPIO_PIN_5
+#define KEY_TURN_L_GPIO_Port GPIOC
 #define NRF_CSN_Pin GPIO_PIN_0
 #define NRF_CSN_GPIO_Port GPIOB
 #define NRF_CE_Pin GPIO_PIN_1
@@ -89,16 +89,16 @@ void Error_Handler(void);
 #define KEY_JOY_L_GPIO_Port GPIOB
 #define NRF_IRQ_Pin GPIO_PIN_14
 #define NRF_IRQ_GPIO_Port GPIOB
-#define KEY_TURN_L_Pin GPIO_PIN_6
-#define KEY_TURN_L_GPIO_Port GPIOC
-#define KEY_GRIP1_Pin GPIO_PIN_7
-#define KEY_GRIP1_GPIO_Port GPIOC
-#define KEY_ESTOP_Pin GPIO_PIN_8
+#define KEY_SPARE_SW1_Pin GPIO_PIN_6
+#define KEY_SPARE_SW1_GPIO_Port GPIOC
+#define KEY_ESTOP_Pin GPIO_PIN_7
 #define KEY_ESTOP_GPIO_Port GPIOC
-#define KEY_SW9_Pin GPIO_PIN_9
-#define KEY_SW9_GPIO_Port GPIOC
-#define KEY_SW12_Pin GPIO_PIN_10
-#define KEY_SW12_GPIO_Port GPIOC
+#define KEY_GRIP1_Pin GPIO_PIN_8
+#define KEY_GRIP1_GPIO_Port GPIOC
+#define KEY_GRIP2_Pin GPIO_PIN_9
+#define KEY_GRIP2_GPIO_Port GPIOC
+#define KEY_SPARE_SW11_Pin GPIO_PIN_10
+#define KEY_SPARE_SW11_GPIO_Port GPIOC
 #define LED_RUN_Pin GPIO_PIN_11
 #define LED_RUN_GPIO_Port GPIOC
 #define LED_AUX_Pin GPIO_PIN_12
