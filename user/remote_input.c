@@ -4,10 +4,19 @@
 #define INPUT_SAMPLE_MS 10U
 #define KEY_DEBOUNCE_MS 20U
 #define ADC_TIMEOUT_MS  2U
-#define AXIS_CENTER     2048
 #define AXIS_DEADZONE   120
 
 volatile RemoteInputDebug_t g_remote_input;
+
+/* First measured neutral values: LX, LY, RX, RY. Recheck after release. */
+static const int32_t s_axis_center[REMOTE_AXIS_COUNT] = {
+    2288, 2216, 2027, 1986
+};
+
+/* Physical convention: right/up positive, left/down negative. */
+static const int8_t s_axis_sign[REMOTE_AXIS_COUNT] = {
+    -1, -1, -1, -1
+};
 
 static uint32_t s_sample_tick;
 static uint32_t s_key_change_tick[REMOTE_KEY_COUNT];
@@ -115,22 +124,28 @@ static HAL_StatusTypeDef Remote_ReadAdc(uint32_t channel,
     return (status == HAL_OK) ? stop_status : status;
 }
 
-static int16_t Remote_Normalize(uint16_t raw)
+static int16_t Remote_Normalize(uint16_t raw, uint32_t index)
 {
-    int32_t delta = (int32_t)raw - AXIS_CENTER;
+    if (index >= REMOTE_AXIS_COUNT) return 0;
+
+    int32_t center = s_axis_center[index];
+    int32_t delta = (int32_t)raw - center;
     int32_t result = 0;
 
     if (delta > AXIS_DEADZONE)
     {
-        result = (delta - AXIS_DEADZONE) * 1000 /
-                 (4095 - AXIS_CENTER - AXIS_DEADZONE);
+        int32_t span = 4095 - center - AXIS_DEADZONE;
+        if (span <= 0) return 0;
+        result = (delta - AXIS_DEADZONE) * 1000 / span;
     }
     else if (delta < -AXIS_DEADZONE)
     {
-        result = (delta + AXIS_DEADZONE) * 1000 /
-                 (AXIS_CENTER - AXIS_DEADZONE);
+        int32_t span = center - AXIS_DEADZONE;
+        if (span <= 0) return 0;
+        result = (delta + AXIS_DEADZONE) * 1000 / span;
     }
 
+    result *= s_axis_sign[index];
     if (result > 1000) result = 1000;
     if (result < -1000) result = -1000;
     return (int16_t)result;
@@ -194,7 +209,7 @@ void RemoteInput_Process(uint32_t now)
     for (uint32_t i = 0U; i < REMOTE_AXIS_COUNT; ++i)
     {
         g_remote_input.raw[i] = sample[i];
-        g_remote_input.axis[i] = Remote_Normalize(sample[i]);
+        g_remote_input.axis[i] = Remote_Normalize(sample[i], i);
     }
     g_remote_input.sample_ms = HAL_GetTick();
     g_remote_input.sample_count++;
