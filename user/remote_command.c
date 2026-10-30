@@ -1,6 +1,9 @@
 #include "remote_command.h"
 
 #define WRIST_SPEED_DPS 60.0f
+#define WRIST_MIN_DEG 30.0f
+#define WRIST_MAX_DEG 150.0f
+#define GRIP_CLOSED_DEG 70.0f
 #define INPUT_MAX_AGE_MS 100U
 #define CENTER_LIMIT 50
 #define ACTION_KEYS (REMOTE_KEY_TURN_L | REMOTE_KEY_TURN_R | \
@@ -14,8 +17,8 @@ static uint32_t s_last_sample_ms;
 
 static float LimitAngle(float angle)
 {
-    if (angle < 0.0f) return 0.0f;
-    if (angle > 180.0f) return 180.0f;
+    if (angle < WRIST_MIN_DEG) return WRIST_MIN_DEG;
+    if (angle > WRIST_MAX_DEG) return WRIST_MAX_DEG;
     return angle;
 }
 
@@ -99,7 +102,7 @@ void RemoteCommand_Process(uint32_t now)
     g_remote_command.servo_target_deg[REMOTE_SERVO_B] =
         g_remote_command.rotate_b ? 180.0f : 0.0f;
     g_remote_command.servo_target_deg[REMOTE_SERVO_C1] =
-        g_remote_command.grip_c1 ? 90.0f : 0.0f;
+        g_remote_command.grip_c1 ? GRIP_CLOSED_DEG : 0.0f;
     g_remote_command.servo_target_deg[REMOTE_SERVO_C2] =
-        g_remote_command.grip_c2 ? 90.0f : 0.0f;
+        g_remote_command.grip_c2 ? GRIP_CLOSED_DEG : 0.0f;
 }
