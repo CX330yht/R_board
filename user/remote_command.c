@@ -82,10 +82,13 @@ void RemoteCommand_Process(uint32_t now)
         (g_remote_input.keys_down & ACTION_KEYS) == 0U) {
         g_remote_command.estop_latched = 0U;
         g_remote_command.enabled = 1U;
+        g_remote_command.arm_token++; /* A requires a new deliberate SW4 press. */
         dt_ms = 0U; /* Do not integrate time spent disabled. */
     }
     if (!g_remote_command.enabled || g_remote_command.estop_latched) return;
 
+    if (pressed & REMOTE_KEY_SPEED)
+        g_remote_command.gear = (uint8_t)((g_remote_command.gear + 1U) % 3U);
     if (pressed & REMOTE_KEY_ROTATE_B) g_remote_command.rotate_b ^= 1U;
     if (pressed & REMOTE_KEY_GRIP1) g_remote_command.grip_c1 ^= 1U;
     if (pressed & REMOTE_KEY_GRIP2) g_remote_command.grip_c2 ^= 1U;
@@ -100,7 +103,7 @@ void RemoteCommand_Process(uint32_t now)
     }
 
     g_remote_command.servo_target_deg[REMOTE_SERVO_B] =
-        g_remote_command.rotate_b ? 180.0f : 0.0f;
+        g_remote_command.rotate_b ? 175.0f : 0.0f;
     g_remote_command.servo_target_deg[REMOTE_SERVO_C1] =
         g_remote_command.grip_c1 ? GRIP_CLOSED_DEG : 0.0f;
     g_remote_command.servo_target_deg[REMOTE_SERVO_C2] =

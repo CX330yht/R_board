@@ -4,6 +4,7 @@
 #include "remote_input.h"
 #include "nrf24.h"
 #include "remote_command.h"
+#include "wireless_tx.h"
 
 volatile RBoardDebug_t g_rboard_debug;
 
@@ -32,7 +33,7 @@ void RBoardApp_Init(void)
 {
     g_rboard_debug = (RBoardDebug_t){0};
 
-    /* LEDs are active-low. Leave the radio disabled in this stage. */
+    /* LEDs are active-low. Radio init below selects PTX. */
     HAL_GPIO_WritePin(LED_RUN_GPIO_Port, LED_RUN_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(LED_AUX_GPIO_Port, LED_AUX_Pin, GPIO_PIN_SET);
     HAL_GPIO_WritePin(NRF_CSN_GPIO_Port, NRF_CSN_Pin, GPIO_PIN_SET);
@@ -42,6 +43,7 @@ void RBoardApp_Init(void)
     RemoteInput_Init();
     RemoteCommand_Init();
     (void)NRF24_Init();
+    WirelessTx_Init();
     RBoard_SendAlive();
 
     s_led_tick = HAL_GetTick();
@@ -53,13 +55,14 @@ void RBoardApp_Process(void)
     uint32_t now = HAL_GetTick();
     RemoteInput_Process(now);
     RemoteCommand_Process(HAL_GetTick());
+    WirelessTx_Process(HAL_GetTick());
 
     g_rboard_debug.uptime_ms = now;
     g_rboard_debug.loop_count++;
     g_rboard_debug.tim2_counter =
         (uint16_t)__HAL_TIM_GET_COUNTER(&htim2);
 
-    /* Raw observation only: no debounce or emergency latch yet. */
+    /* Diagnostic raw levels; RemoteCommand owns debounce/latching. */
     g_rboard_debug.estop_pressed_raw =
         (HAL_GPIO_ReadPin(KEY_ESTOP_GPIO_Port, KEY_ESTOP_Pin)
          == GPIO_PIN_RESET) ? 1U : 0U;

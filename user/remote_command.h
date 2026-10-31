@@ -24,6 +24,8 @@ typedef struct {
     uint8_t rotate_b;
     uint8_t grip_c1;
     uint8_t grip_c2;
+    uint32_t arm_token;
+    uint8_t gear; /* 0/1/2 => 30/60/100 percent */
     uint8_t enabled;
     uint8_t estop_latched;
     uint8_t input_fresh;
