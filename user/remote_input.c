@@ -22,6 +22,8 @@ static uint32_t s_sample_tick;
 static uint32_t s_key_change_tick[REMOTE_KEY_COUNT];
 static uint8_t s_candidate_keys;
 static uint8_t s_stable_keys;
+static uint8_t s_sw12_candidate,s_sw12_stable;
+static uint32_t s_sw12_change_tick;
 
 static const uint32_t s_adc_channels[REMOTE_AXIS_COUNT] =
 {
@@ -59,6 +61,31 @@ static uint8_t Remote_ReadKeys(void)
     return mask;
 }
 
+static uint8_t Remote_ReadSw12(void)
+{
+    return HAL_GPIO_ReadPin(KEY_SPARE_SW12_GPIO_Port,KEY_SPARE_SW12_Pin)
+           ==GPIO_PIN_RESET;
+}
+
+static void Remote_UpdateSw12(uint32_t now)
+{
+    uint8_t raw=Remote_ReadSw12();
+    g_remote_input.sw12_pressed=0;
+    g_remote_input.sw12_released=0;
+    if(raw!=s_sw12_candidate) {
+        s_sw12_candidate=raw; s_sw12_change_tick=now;
+    }
+    if(s_sw12_candidate!=s_sw12_stable &&
+       (uint32_t)(now-s_sw12_change_tick)>=KEY_DEBOUNCE_MS) {
+        s_sw12_stable=s_sw12_candidate;
+        if(s_sw12_stable) {
+            g_remote_input.sw12_pressed=1;
+            g_remote_input.sw12_press_count++;
+        } else g_remote_input.sw12_released=1;
+    }
+    g_remote_input.sw12_down=s_sw12_stable;
+}
+
 static void Remote_UpdateKeys(uint32_t now)
 {
     uint8_t raw = Remote_ReadKeys();
@@ -94,6 +121,7 @@ static void Remote_UpdateKeys(uint32_t now)
         }
     }
     g_remote_input.keys_down = s_stable_keys;
+    Remote_UpdateSw12(now);
 }
 
 static HAL_StatusTypeDef Remote_ReadAdc(uint32_t channel,
@@ -167,6 +195,11 @@ void RemoteInput_Init(void)
     {
         s_key_change_tick[i] = now;
     }
+
+    /* A held SW12 at boot does not create a press event. */
+    s_sw12_candidate=s_sw12_stable=Remote_ReadSw12();
+    s_sw12_change_tick=now;
+    g_remote_input.sw12_down=s_sw12_stable;
 
     /* Hardware ADC calibration, not joystick neutral calibration. */
     g_remote_input.calibration_status = HAL_ADCEx_Calibration_Start(&hadc1);

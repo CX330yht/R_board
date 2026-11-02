@@ -79,13 +79,27 @@ void RemoteCommand_Process(uint32_t now)
     }
 
     if ((pressed & REMOTE_KEY_ENABLE) && InputsCentered() &&
-        (g_remote_input.keys_down & ACTION_KEYS) == 0U) {
+        (g_remote_input.keys_down & ACTION_KEYS) == 0U &&
+        !g_remote_input.sw12_down) {
         g_remote_command.estop_latched = 0U;
         g_remote_command.enabled = 1U;
         g_remote_command.arm_token++; /* A requires a new deliberate SW4 press. */
         dt_ms = 0U; /* Do not integrate time spent disabled. */
+        /* Re-enable never resumes an old automatic movement. */
+        g_remote_command.arm_auto_active=0;
+        g_remote_command.arm_preset_64=0;
     }
     if (!g_remote_command.enabled || g_remote_command.estop_latched) return;
+
+    /* A deliberate manual right-Y movement takes priority. */
+    uint8_t manual_arm=g_remote_command.right_y < -CENTER_LIMIT ||
+                       g_remote_command.right_y > CENTER_LIMIT;
+    if(manual_arm) {
+        g_remote_command.arm_auto_active=0;
+    } else if(g_remote_input.sw12_pressed) {
+        g_remote_command.arm_preset_64^=1U;
+        g_remote_command.arm_auto_active=1U;
+    }
 
     if (pressed & REMOTE_KEY_SPEED)
         g_remote_command.gear = (uint8_t)((g_remote_command.gear + 1U) % 3U);

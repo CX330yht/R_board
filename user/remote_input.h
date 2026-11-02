@@ -49,6 +49,9 @@ typedef struct
     uint32_t key_press_count[REMOTE_KEY_COUNT];
     HAL_StatusTypeDef calibration_status;
     HAL_StatusTypeDef adc_status;
+    /* Ninth key kept separate from the existing eight-bit key mask. */
+    uint8_t sw12_down,sw12_pressed,sw12_released;
+    uint32_t sw12_press_count;
 } RemoteInputDebug_t;
 
 extern volatile RemoteInputDebug_t g_remote_input;

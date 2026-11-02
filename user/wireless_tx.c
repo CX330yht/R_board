@@ -29,7 +29,10 @@ void WirelessTx_Process(uint32_t now)
     p.arm_token=g_remote_command.arm_token;
     p.flags=(g_remote_command.enabled?RADIO_FLAG_ENABLED:0U)|
             (g_remote_command.estop_latched?RADIO_FLAG_ESTOP:0U)|
-            (g_remote_command.input_fresh?RADIO_FLAG_FRESH:0U);
+            (g_remote_command.input_fresh?RADIO_FLAG_FRESH:0U)|
+            (g_remote_command.arm_auto_active?RADIO_FLAG_ARM_AUTO:0U)|
+            (g_remote_command.arm_preset_64?RADIO_FLAG_ARM_64:0U)|
+            (g_remote_input.sw12_down?RADIO_FLAG_SW12_DOWN:0U);
     p.keys=g_remote_input.keys_down;
     p.gear=g_remote_command.gear;
     for(unsigned i=0;i<4;i++) {

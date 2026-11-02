@@ -32,6 +32,7 @@ typedef struct {
     uint8_t pressed_edges;
     uint32_t input_fault_count;
     uint32_t sample_update_count;
+    uint8_t arm_auto_active,arm_preset_64;
 } RemoteCommandDebug_t;
 
 extern volatile RemoteCommandDebug_t g_remote_command;
